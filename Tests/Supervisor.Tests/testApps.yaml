@@ -1,0 +1,10 @@
+---
+- name: testApp
+  program: C:\test.exe
+  args:
+  - "-a"
+  - "-f"
+  - path to file
+- name: testapp2
+  program: C:\Program Files\test.exe
+

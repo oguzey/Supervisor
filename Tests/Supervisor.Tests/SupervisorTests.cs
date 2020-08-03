@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -7,27 +10,38 @@ namespace Supervisor.Tests {
     public class SupervisorTests {
         [TestMethod]
         public void ParseArgs() {
-            var args = Program.ParseArgs(new string[] {
-                "test.exe 1 \"88\"",
-                "\"C:\\Program Files\\test.exe\" \"33\""
-            });
+            string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            string projectPath = appDirectory.Substring(0, appDirectory.IndexOf("\\bin"));
+            string testAppsPath = projectPath + "\\testApps.yaml";
+            var args = Supervisor.ParseYamlConfig(testAppsPath);
             Assert.AreEqual(2, args.Count);
-            Assert.AreEqual(new ProgramArgs {
-                ExeName = "test.exe",
-                Arguments = "1 \"88\""
-            }, args[0]);
-            Assert.AreEqual(new ProgramArgs {
-                ExeName = "C:\\Program Files\\test.exe",
-                Arguments = "\"33\""
-            }, args[1]);
+            var firstApp = new App {
+                Name = "testApp",
+                Program = "C:\\test.exe",
+                Args = new List<string>() { "-a", "-f", "path to file" }
+            };
+            var secondApp = new App {
+                Name = "testapp2",
+                Program = "C:\\Program Files\\test.exe",
+                Args = null
+            };
+            Assert.AreEqual(firstApp, args[0]);
+            Assert.AreEqual(secondApp, args[1]);
+
+            Assert.AreEqual(firstApp.GetArgs(), "-a -f \"path to file\"");
+            Assert.AreEqual(secondApp.GetArgs(), null);
+
+            Assert.AreEqual(firstApp.ToString(), "testApp: C:\\test.exe -a -f \"path to file\"");
+            Assert.AreEqual(secondApp.ToString(), "testapp2: C:\\Program Files\\test.exe");
         }
 
         [TestMethod]
         public void MonitorProcess() {
-            var args = new ProgramArgs {
-                ExeName = "cmd.exe"
+            var app = new App {
+                Name = "cmd",
+                Program = "cmd.exe"
             };
-            var monitor = new MonitorThread(args);
+            var monitor = new MonitorThread(app);
             try {
                 // Process won't start until this thread is idle
                 var waitForProcess = new Thread(delegate () {
