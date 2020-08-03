@@ -1,15 +1,20 @@
 # Supervisor
-Simple process supervisor for Windows. Download built app here: [https://github.com/chebum/Supervisor/releases/tag/1.0](https://github.com/chebum/Supervisor/releases/tag/1.0)
+Simple process supervisor for Windows.
 
 ## Usage examples
-Start and monitor one app:
+Start and monitor application(s):
 
-	supervisor myapp.exe
+	supervisor myapp.yaml
                 
-Start and monitor two apps:
-
-	supervisor app1.exe "Path With Spaces\app2.exe"
-
-Start two apps with arguments:
-
-	supervisor "app1.exe arg1" """Path With Spaces\app1.exe"" ""argument with spaces"""
+Example of `myapp.yaml`:
+```
+---
+- name: testApp
+  program: C:\test.exe
+  args:
+  - "-a"
+  - "-f"
+  - path to file
+- name: testapp2
+  program: C:\Program Files\test.exe
+```
